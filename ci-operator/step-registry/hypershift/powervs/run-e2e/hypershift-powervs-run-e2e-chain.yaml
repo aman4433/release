@@ -4,7 +4,31 @@ chain:
     - as: run-e2e
       cli: latest
       commands: |-
-        
+        # Load values from existing-resources.json if not provided by the environment
+        if [[ -z "${POWERVS_GUID}" ]]; then
+          POWERVS_GUID=$(jq -r '.cloudInstanceID' "${CLUSTER_PROFILE_DIR}/existing-resources.json")
+        fi
+
+        if [[ -z "${POWERVS_REGION}" ]]; then
+          POWERVS_REGION=$(jq -r '.region' "${CLUSTER_PROFILE_DIR}/existing-resources.json")
+        fi
+
+        if [[ -z "${POWERVS_ZONE}" ]]; then
+          POWERVS_ZONE=$(jq -r '.zone' "${CLUSTER_PROFILE_DIR}/existing-resources.json")
+        fi
+
+        if [[ -z "${POWERVS_VPC_REGION}" ]]; then
+          POWERVS_VPC_REGION=$(jq -r '.vpcRegion' "${CLUSTER_PROFILE_DIR}/existing-resources.json")
+        fi
+
+        if [[ -z "${POWERVS_VPC}" ]]; then
+          POWERVS_VPC=$(jq -r '.vpc' "${CLUSTER_PROFILE_DIR}/existing-resources.json")
+        fi
+
+        if [[ -z "${TRANSIT_GATEWAY}" ]]; then
+          TRANSIT_GATEWAY=$(jq -r '.transitGateway' "${CLUSTER_PROFILE_DIR}/existing-resources.json")
+        fi
+
         # Running e2e test
         export IBMCLOUD_CREDENTIALS="${CLUSTER_PROFILE_DIR}/credentials"
         bin/test-e2e \
@@ -17,13 +41,14 @@ chain:
         --e2e.latest-release-image=${OCP_IMAGE_MULTI} \
         --e2e.node-pool-replicas=2 \
         --e2e.powervs-resource-group=ibm-hypershift-dev \
-        --e2e.powervs-region=syd \
-        --e2e.powervs-zone=syd04 \
-        --e2e.powervs-vpc-region=au-syd \
+        --e2e.powervs-region="$POWERVS_REGION" \
+        --e2e.powervs-zone="$POWERVS_ZONE" \
+        --e2e.powervs-vpc-region="$POWERVS_VPC_REGION" \
         --e2e.powervs-sys-type=e980 \
-        --e2e-powervs-cloud-instance-id=3358be60-dd61-41af-ab07-79139e149142 \
-        --e2e-powervs-cloud-connection=rh-upstream-hypershift-powervs-ci-e2e-cc \
-        --e2e-powervs-vpc=rh-upstream-hypershift-powervs-ci-e2e-vpc
+        --e2e-powervs-cloud-instance-id="$POWERVS_GUID" \
+        --e2e-powervs-power-edge-router=true \
+        --e2e-powervs-transit-gateway="$TRANSIT_GATEWAY" \
+        --e2e-powervs-vpc="$POWERVS_VPC"
       credentials:
         - mount_path: /etc/hypershift-pool-powervs-credentials
           name: hypershift-pool-powervs-credentials
@@ -46,4 +71,3 @@ chain:
           cpu: 100m
           memory: 100Mi
       timeout: 2h30m0s
-
