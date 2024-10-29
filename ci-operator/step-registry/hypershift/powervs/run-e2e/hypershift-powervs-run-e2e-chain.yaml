@@ -1,4 +1,4 @@
-chain:
+ chain:
   as: hypershift-powervs-run-e2e
   steps:
     - as: run-e2e
@@ -7,28 +7,34 @@ chain:
         # Load values from existing-resources.json if not provided by the environment
         if [[ -z "${POWERVS_GUID}" ]]; then
           POWERVS_GUID=$(jq -r '.cloudInstanceID' "${CLUSTER_PROFILE_DIR}/existing-resources.json")
+          export POWERVS_GUID
         fi
 
         if [[ -z "${POWERVS_REGION}" ]]; then
           POWERVS_REGION=$(jq -r '.region' "${CLUSTER_PROFILE_DIR}/existing-resources.json")
+          export POWERVS_REGION
         fi
 
         if [[ -z "${POWERVS_ZONE}" ]]; then
           POWERVS_ZONE=$(jq -r '.zone' "${CLUSTER_PROFILE_DIR}/existing-resources.json")
+          export POWERVS_ZONE
         fi
 
         if [[ -z "${POWERVS_VPC_REGION}" ]]; then
           POWERVS_VPC_REGION=$(jq -r '.vpcRegion' "${CLUSTER_PROFILE_DIR}/existing-resources.json")
+          export POWERVS_VPC_REGION
         fi
 
         if [[ -z "${POWERVS_VPC}" ]]; then
           POWERVS_VPC=$(jq -r '.vpc' "${CLUSTER_PROFILE_DIR}/existing-resources.json")
+          export POWERVS_VPC
         fi
 
         if [[ -z "${TRANSIT_GATEWAY}" ]]; then
           TRANSIT_GATEWAY=$(jq -r '.transitGateway' "${CLUSTER_PROFILE_DIR}/existing-resources.json")
+          export TRANSIT_GATEWAY
         fi
-
+         
         # Running e2e test
         export IBMCLOUD_CREDENTIALS="${CLUSTER_PROFILE_DIR}/credentials"
         bin/test-e2e \
